@@ -93,7 +93,6 @@ class Overlord(object):
         write_config()
         self.config = ConfigParser.ConfigParser()
         self.config.read(os.path.expanduser("~/.config/vboxoverlord/vbo.conf"))
-        print self.config
         self.username = self.config.get("global", "username")
         self.port = self.config.getint("global", "port")
         self.password = getpass("Enter global VM user password: ")
@@ -150,7 +149,9 @@ class Overlord(object):
             for key in self.servers:
                 vbox = self.servers[key]
                 if cmd_list[1] in vbox.getVMNames():
-                    print "'{0}' is on '{1}'".format(cmd_list[1], vbox.host)
+                    print "'{0}' is on '{1}'".format(' '.join(cmd_list[1:]), vbox.host)
+                    return
+            print "VM '{0}' not found".format(cmd_list[1])
         else:
             server = cmd_list[0]
             if server in self.servers:
