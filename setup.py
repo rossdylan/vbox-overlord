@@ -14,6 +14,7 @@ setup(
     long_description="Control multiple vbox instances at once",
     author='Ross Delinger',
     author_email='rossdylan@csh.rit.edu',
+    url="https://github.com/rossdylan/vbox-overlord",
     license='MIT',
     classifiers=[
         "License :: OSI Approved :: MIT",
