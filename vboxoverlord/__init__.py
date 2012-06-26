@@ -4,6 +4,21 @@ from getpass import getpass
 from functools import partial
 
 
+def write_config():
+    import os
+    import os.path
+    if os.path.exists(os.path.expanduser("~/.config/vboxoverlord/")):
+        return
+    else:
+        os.mkdir(os.path.expanduser("~/.config/vboxoverlord"))
+        with open(os.path.expanduser("~/.config/vboxoverlord/vbo.conf"),'w') as f:
+            f.write("""
+                    [global]
+                    user = vm
+                    port = 22
+                    [servers]
+                    """)
+
 class SuperParamiko(object):
     def __init__(self, host, username, password=None, port=22):
         self.session = paramiko.SSHClient()
@@ -74,6 +89,7 @@ class VboxServer(object):
 
 class Overlord(object):
     def __init__(self, config_path):
+        write_config()
         self.config = ConfigParser.ConfigParser()
         self.config.read(config_path)
         print self.config
@@ -129,7 +145,11 @@ class Overlord(object):
             exit()
         elif cmd_list[0] == "servers":
             print '\n'.join(self.getServers())
-
+        elif cmd_list[0] == "whereis":
+            for key in self.servers:
+                vbox = self.servers[key]
+                if cmd_list[1] in vbox.getVMNames():
+                    print "'{0}' is on '{1}'".format(cmd_list[1], vbox.host)
         else:
             server = cmd_list[0]
             if server in self.servers:
