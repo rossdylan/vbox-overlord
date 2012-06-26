@@ -1,23 +1,24 @@
 import paramiko
 import ConfigParser
+import os
+import os.path
 from getpass import getpass
 from functools import partial
 
 
 def write_config():
-    import os
-    import os.path
     if os.path.exists(os.path.expanduser("~/.config/vboxoverlord/")):
         return
     else:
         os.mkdir(os.path.expanduser("~/.config/vboxoverlord"))
-        with open(os.path.expanduser("~/.config/vboxoverlord/vbo.conf"),'w') as f:
-            f.write("""
-                    [global]
-                    user = vm
-                    port = 22
-                    [servers]
-                    """)
+        with open(os.path.expanduser("~/.config/vboxoverlord/vbo.conf"),'wb') as f:
+            config = ConfigParser.RawConfigParser()
+            config.add_section('global')
+            config.set('global', 'username', 'vm')
+            config.set('global', 'port', 22)
+            config.add_section('servers')
+            config.set('servers', 'local', 'localhost')
+            config.write(f)
 
 class SuperParamiko(object):
     def __init__(self, host, username, password=None, port=22):
@@ -88,10 +89,10 @@ class VboxServer(object):
 
 
 class Overlord(object):
-    def __init__(self, config_path):
+    def __init__(self):
         write_config()
         self.config = ConfigParser.ConfigParser()
-        self.config.read(config_path)
+        self.config.read(os.path.expanduser("~/.config/vboxoverlord/vbo.conf"))
         print self.config
         self.username = self.config.get("global", "username")
         self.port = self.config.getint("global", "port")
@@ -166,8 +167,7 @@ class Overlord(object):
                 print "VM '{0}' not found".format(server)
 
 def rpel():
-    import os.path
-    overlord = Overlord(os.path.expanduser("~/.config/vboxoverlord.conf"))
+    overlord = Overlord()
     while True:
         try:
             overlord.handle_input(raw_input(">> "))
