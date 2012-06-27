@@ -9,7 +9,7 @@ except ImportError:
 
 setup(
     name='vboxoverlord',
-    version='0.1.1',
+    version='0.1.2',
     description="Overlord of all things virtualbox",
     long_description="Control multiple vbox instances at once",
     author='Ross Delinger',
