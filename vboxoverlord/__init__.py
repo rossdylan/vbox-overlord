@@ -1,9 +1,10 @@
+from __future__ import print_function
 import ConfigParser
 import os
 import os.path
 from getpass import getpass
 from SuperParamiko import SuperParamiko
-
+from itertools import chain
 
 def write_config():
     if os.path.exists(os.path.expanduser("~/.config/vboxoverlord/")):
@@ -19,6 +20,8 @@ def write_config():
             config.set('servers', 'local', 'localhost')
             config.write(f)
 
+def print_list(l):
+    print('\n'.join(l))
 
 class VboxServer(object):
     def __init__(self, host, port, user, password):
@@ -70,51 +73,57 @@ class Overlord(object):
         self.servers = {}
         for server in temp:
             self.servers[server.host] = server
+        self.commands = {
+            "vms": lambda args: print_list(self.getAllVMs()),
+            "runningvms": lambda *args: print_list(self.getRunningVMs()),
+            "servers": lambda *args: print_list(self.getServers()),
+            "whereis": lambda *args: print(
+                self.whereis(' '.join(list(*args)))
+                ),
+            "exit": lambda *args: exit()
+            }
+
 
     def getServers(self):
         return [s for s in self.servers]
 
     def getAllVMs(self):
-        things = []
-        for key in self.servers:
-            things.append("----{0}----".format(key))
-            vms = self.servers[key].getVMs()
-            things.extend(vms)
-        return things
+        return chain.from_iterable(
+                map(
+                    lambda vbox: ["----{0}----".format(vbox.host),] + vbox.getVMs(),
+                    self.servers.values()
+                    )
+                )
 
 
-    def getAllRunningVMs(self):
-        things = []
-        for key in self.servers:
-            things.append("---{0}---".format(key))
-            vms = self.servers[key].getRunningVMs()
-            things.extend(vms)
-        return things
+    def getRunningVMs(self):
+        return chain.from_iterable(
+                map(
+                    lambda vbox: ["----{0}----".format(vbox.host),] + vbox.getRunningVMs(),
+                    self.servers.values()
+                    )
+                )
 
     def raw(self, server, *args):
         try:
-            print '\n'.join(self.servers[server].raw(*args))
+            print_list(self.servers[server].raw(*args))
         except KeyError:
-            print "Server: '{0}' does not exist".format(server)
+            print("Server: '{0}' does not exist".format(server))
+
+    def whereis(self, vm_name):
+        hosts = filter(lambda vbox: vm_name in vbox.getVMNames(),
+                self.servers.values())
+        try:
+            return "'{0} is on '{1}'".format(vm_name, hosts[0].host)
+        except IndexError:
+            return "'{0}' not found".format(vm_name)
+
 
     def handle_input(self, cmd):
         cmd_list = cmd.split(" ")
-        if cmd_list[0] == "vms":
-            print '\n'.join(self.getAllVMs())
-        elif cmd_list[0] == "runningvms":
-            print '\n'.join(self.getAllVMs())
-        elif cmd_list[0] == "exit":
-            exit()
-        elif cmd_list[0] == "servers":
-            print '\n'.join(self.getServers())
-        elif cmd_list[0] == "whereis":
-            for key in self.servers:
-                vbox = self.servers[key]
-                if cmd_list[1] in vbox.getVMNames():
-                    print "'{0}' is on '{1}'".format(' '.join(cmd_list[1:]), vbox.host)
-                    return
-            print "VM '{0}' not found".format(cmd_list[1])
-        else:
+        try:
+            self.commands[cmd_list[0]](tuple(cmd_list[1:]))
+        except KeyError:
             server = cmd_list[0]
             if server in self.servers:
                 args = tuple(cmd_list[1:])
@@ -127,7 +136,7 @@ class Overlord(object):
                         args = tuple(cmd_list[1:])
                         self.raw(vbox.host, *args)
                         return
-                print "VM '{0}' not found".format(server)
+                print("VM '{0}' not found".format(server))
 
 def rpel():
     overlord = Overlord()
@@ -138,4 +147,4 @@ def rpel():
             exit()
         except KeyboardInterrupt:
             continue
-        print ""
+        print("")
