@@ -17,11 +17,10 @@ setup(
     url="https://github.com/rossdylan/vbox-overlord",
     license='MIT',
     classifiers=[
-        "License :: OSI Approved :: MIT",
-        "Programming Lnaguage :: Python :: 2"
+        "Programming Language :: Python :: 2"
     ],
     install_requires=[
-        'paramiko',
+        'SuperParamiko',
         ],
     packages=['vboxoverlord'],
     include_package_data=True,
