@@ -7,10 +7,11 @@ from SuperParamiko import SuperParamiko
 from itertools import chain
 
 def write_config():
-    if os.path.exists(os.path.expanduser("~/.config/vboxoverlord/")):
+    if os.path.exists(os.path.expanduser("~/.config/vboxoverlord/vbo.conf")):
         return
     else:
-        os.mkdir(os.path.expanduser("~/.config/vboxoverlord"))
+        if not os.path.exists(os.path.expanduser("~/.config/vboxoverlord/")):
+            os.mkdir(os.path.expanduser("~/.config/vboxoverlord"))
         with open(os.path.expanduser("~/.config/vboxoverlord/vbo.conf"),'wb') as f:
             config = ConfigParser.RawConfigParser()
             config.add_section('global')
