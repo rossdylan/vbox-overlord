@@ -34,20 +34,20 @@ class VboxServer(object):
                 port = port
         )
 
-    def getVMNames(self):
-        vm_names = map(lambda vm: vm.split(" ")[0].replace('"', ""), self.getVMs())
+    def get_vm_names(self):
+        vm_names = map(lambda vm: vm.split(" ")[0].replace('"', ""), self.get_vms())
         return vm_names
 
-    def controlVM(self, VM, option):
+    def control_vm(self, VM, option):
         return self.connection.vboxmanage("controlvm", VM, option)
 
-    def startHeadless(self, VM):
+    def start_headless(self, VM):
         return self.connection.vboxmanage("startvm", VM, type="headless")
 
-    def getVMs(self):
+    def get_vms(self):
         return self.connection.vboxmanage("list", "vms")
 
-    def getRunningVMs(self):
+    def get_running_vms(self):
         return self.connection.vboxmanage("list", "runningvms")
 
     def raw(self, *args):
@@ -75,53 +75,54 @@ class Overlord(object):
         for server in temp:
             self.servers[server.host] = server
         self.commands = {
-            "vms": lambda args: print_list(self.getAllVMs()),
-            "runningvms": lambda *args: print_list(self.getRunningVMs()),
-            "servers": lambda *args: print_list(self.getServers()),
+            "vms": lambda args: print_list(self.get_all_vms()),
+            "runningvms": lambda *args: print_list(self.get_running_vms()),
+            "servers": lambda *args: print_list(self.get_servers()),
             "whereis": lambda *args: print(
-                self.whereis(' '.join(list(*args)))
+                self.where_is(' '.join(list(*args)))
                 ),
-            "control" : lambda *args: self.controlVM(*args),
-            "start": lambda *args: self.startVM(*args),
+            "control" : lambda *args: self.control_vm(*args),
+            "start": lambda *args: self.start_vm(*args),
             "exit": lambda *args: exit()
             }
+
     def get_vm_host(self, vm_name):
         try:
-            return filter(lambda vbox: vm_name in vbox.getVMNames(),
+            return filter(lambda vbox: vm_name in vbox.get_vm_names(),
                     self.servers.values())[0]
         except IndexError:
             return None
 
-    def controlVM(self, vm_name, option):
+    def control_vm(self, vm_name, option):
         host = self.get_vm_host(vm_name)
         if host != None:
-            print_list(host.controlVM(vm_name, option))
+            print_list(host.control_vm(vm_name, option))
         else:
             print("VM '{0}' not found")
 
-    def startVM(self, vm_name):
+    def start_vm(self, vm_name):
         host = self.get_vm_host(vm_name)
         if host != None:
-            host.startVM(vm_name)
+            host.start_vm(vm_name)
         else:
             print("VM '{0}' not found")
 
-    def getServers(self):
+    def get_servers(self):
         return [s for s in self.servers]
 
-    def getAllVMs(self):
+    def get_all_vms(self):
         return chain.from_iterable(
                 map(
-                    lambda vbox: ["----{0}----".format(vbox.host),] + vbox.getVMs(),
+                    lambda vbox: ["----{0}----".format(vbox.host),] + vbox.get_vms(),
                     self.servers.values()
                     )
                 )
 
 
-    def getRunningVMs(self):
+    def get_running_vms(self):
         return chain.from_iterable(
                 map(
-                    lambda vbox: ["----{0}----".format(vbox.host),] + vbox.getRunningVMs(),
+                    lambda vbox: ["----{0}----".format(vbox.host),] + vbox.get_running_vms(),
                     self.servers.values()
                     )
                 )
@@ -132,8 +133,8 @@ class Overlord(object):
         except KeyError:
             print("Server: '{0}' does not exist".format(server))
 
-    def whereis(self, vm_name):
-        hosts = filter(lambda vbox: vm_name in vbox.getVMNames(),
+    def where_is(self, vm_name):
+        hosts = filter(lambda vbox: vm_name in vbox.get_vm_names(),
                 self.servers.values())
         try:
             return "'{0} is on '{1}'".format(vm_name, hosts[0].host)
@@ -154,7 +155,7 @@ class Overlord(object):
                 # Server is assumed to be a vm name now
                 for key in self.servers:
                     vbox = self.servers[key]
-                    if server in vbox.getVMNames():
+                    if server in vbox.get_vm_names():
                         args = tuple(cmd_list[1:])
                         self.raw(vbox.host, *args)
                         return
