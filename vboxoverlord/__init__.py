@@ -38,7 +38,7 @@ class VboxServer(object):
         return vm_names
 
     def controlVM(self, VM, option):
-        return self.connection.vboxmanage("controlvm", option, VM)
+        return self.connection.vboxmanage("controlvm", VM, option)
 
     def startHeadless(self, VM):
         return self.connection.vboxmanage("startvm", VM, type="headless")
@@ -80,9 +80,30 @@ class Overlord(object):
             "whereis": lambda *args: print(
                 self.whereis(' '.join(list(*args)))
                 ),
+            "control" : lambda *args: self.controlVM(*args),
+            "start": lambda *args: self.startVM(*args),
             "exit": lambda *args: exit()
             }
+    def get_vm_host(self, vm_name):
+        try:
+            return filter(lambda vbox: vm_name in vbox.getVMNames(),
+                    self.servers.values())[0]
+        except IndexError:
+            return None
 
+    def controlVM(self, vm_name, option):
+        host = self.get_vm_host(vm_name)
+        if host != None:
+            print_list(host.controlVM(vm_name, option))
+        else:
+            print("VM '{0}' not found")
+
+    def startVM(self, vm_name):
+        host = self.get_vm_host(vm_name)
+        if host != None:
+            host.startVM(vm_name)
+        else:
+            print("VM '{0}' not found")
 
     def getServers(self):
         return [s for s in self.servers]
