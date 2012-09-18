@@ -27,6 +27,6 @@ setup(
     zip_safe=False,
     entry_points="""
     [console_scripts]
-    vbox_overlord = vboxoverlord:rpel
+    vbo = vboxoverlord:rpel
     """
 )
