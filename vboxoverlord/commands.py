@@ -90,6 +90,58 @@ class Commands(object):
         else:
             return "VM {0} not found"
 
+    def init(self, *args):
+        """
+        Command to deal with all things init level related
+        """
+        sub_command = args[0]
+        if sub_command == "add" or sub_command == "remove":
+            level = args[1]
+            vm_name = " ".join(args[2:])
+            if sub_command == "add":
+                result = self.vbo.add_init(level, vm_name)
+                if result:
+                    return "Added '{0}' to init level {1}".format(
+                            vm_name,
+                            level)
+                else:
+                    return "Failed to add {0} to init level {1}".format(
+                            vm_name,
+                            level)
+            if sub_command == "remove":
+                result = self.vbo.remove_init(level, vm_name)
+                if result:
+                    return "Removed '{0}' from init level {1}".format(
+                            vm_name,
+                            level)
+                else:
+                    return "Failed to remove '{0}' from init level {1}".format(
+                            vm_name,
+                            level)
+                if sub_command == "start" or sub_command == "stop":
+                    level = args[1]
+                    if sub_command == "stop":
+                        vms_to_stop = self.vbo.init_levels[level]
+                        output = []
+                        for vm in vms_to_stop:
+                            host = get_vm_host(self.vbo, vm)
+                            result = host.force_stop(vm)
+                            output.append(result)
+                        output.append("Immediate shutdown of init level {0} complete".format(level))
+                        return output
+                    if sub_command == "start":
+                        vms_to_start = self.vbo.init_levels[level]
+                        output = []
+                        for vm in vms_to_start:
+                            host = get_vm_host(self.vbo, vm)
+                            result = host.start(vm)
+                            output.append(result)
+                        output.append("Startup of init level {0} complete".format(level))
+
+
+
+
+
 
     def exit(self, *args):
         """

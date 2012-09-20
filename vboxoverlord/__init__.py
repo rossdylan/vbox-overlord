@@ -70,6 +70,8 @@ class Overlord(object):
         self.port = self.config.getint("global", "port")
         self.password = getpass("Enter global VM user password: ")
         self.init_levels = build_init_levels(self.config)
+        self.init_levels_changed = False
+        # Used to tell if we modified the init levels
         self.commands = Commands(self)
         temp = map(
             lambda item: VboxServer(
@@ -84,6 +86,36 @@ class Overlord(object):
         for server in temp:
             self.servers[server.host] = server
 
+    def add_init(self, level, vm_name):
+        """
+        Add a machine to an init level
+        Returns false if machine is already in an init level
+        """
+        if level not in self.init_levels:
+            return False
+
+        for level in self.init_levels:
+            if vm_name in level:
+                return False
+
+        self.init_levels[str(level)].append(vm_name)
+        self.init_levels_changed = True
+        return True
+
+    def remove_init(self, level, vm_name):
+        """
+        Remove a machine from an init level
+        Returns false if the machine isn't in the specified init_level
+        """
+        if level not in self.init_levels:
+            return False
+
+        try:
+            self.init_levels['level'].remove(vm_name)
+            self.init_levels_changed = True
+            return True
+        except:
+            return False
 
     def exit(self):
         """
