@@ -31,7 +31,7 @@ class Commands(object):
         Command function to print out a formatted list of all stopped VMS on all
         servers
         """
-        running = get_running_vms(self.vbo)
+        running = get_all_running_vms(self.vbo)
         allvms = get_all_vms(self.vbo)
         return filter(lambda vm: vm not in running, allvms)
 
