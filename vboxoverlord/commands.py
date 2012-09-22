@@ -1,5 +1,7 @@
 from __future__ import print_function
 from util import *
+from string import strip
+import inspect
 
 
 class Commands(object):
@@ -8,28 +10,30 @@ class Commands(object):
 
     def __call__(self, cmd, *args):
         try:
-            print_list(getattr(self,cmd)(*args))
+            result = getattr(self,cmd)(*args)
+            if type(result) == type(""):
+                print_list([result])
+            else:
+                print_list(result)
         except Exception as e:
             print(e)
             print("Command '{0}' failed :(".format(cmd))
 
     def vms(self, *args):
         """
-        Command Function to print out a formatted list of all VMs on all servers
+        vms [] Print out all VMs on every server
         """
         return get_all_vms_formatted(self.vbo)
 
     def runningvms(self, *args):
         """
-        Command function to print out a formattted list of all running VMs on
-        all servers
+        runningvms [] Print out all running VMs on every server
         """
         return get_all_running_vms_formatted(self.vbo)
 
     def stoppedvms(self, *args):
         """
-        Command function to print out a formatted list of all stopped VMS on all
-        servers
+        stoppedvms [] Print out all stopped VMs on every server
         """
         running = get_all_running_vms(self.vbo)
         allvms = get_all_vms(self.vbo)
@@ -37,7 +41,7 @@ class Commands(object):
 
     def whereis(self, *args):
         """
-        Command function to display which host a VM is on
+        whereis [VM_NAME] Print out which server a VM is on
         """
         if len(args) < 1:
             return "Error, whereis takes a VM name as an argument"
@@ -52,14 +56,14 @@ class Commands(object):
 
     def servers(self, *args):
         """
-        Command to return a list of all servers we know about
+        servers [] Print out a list of VBox servers we can control
         """
         return [s for s in self.vbo.servers]
 
 
     def forcestop(self, *args):
         """
-        Command to forcefully power off a VM
+        forcestop [VM_NAME] Pull the plug on a VM, essentially forcing it offline
         """
         vm_name = ' '.join(args)
         host = get_vm_host(self.vbo, vm_name)
@@ -68,7 +72,7 @@ class Commands(object):
 
     def stop(self, *args):
         """
-        Command to Stop a given VM
+        stop [VM_NAME] Ask the VM to shutdown nicely as opposed to forcefully powering it off
         """
         vm_name = ' '.join(args)
         host = get_vm_host(self.vbo, vm_name)
@@ -80,7 +84,7 @@ class Commands(object):
 
     def start(self, *args):
         """
-        Command to start a vm
+        start [VM_NAME] Turn the specified VM on (This does so in headless mode)
         """
         vm_name = ' '.join(args)
         host = get_vm_host(self.vbo, vm_name)
@@ -92,7 +96,11 @@ class Commands(object):
 
     def init(self, *args):
         """
-        Command to deal with all things init level related
+        init [start | stop | add | remove] [level] (VM_NAMES) Handle the VM init level system
+            init start     [level] Start the specified init level
+            init stop      [level] Force stop the specified init level
+            init add       [level] [VM_NAME] Add the specified VM to the specified level
+            init remove    [level] [VM_NAME] Remove the specified VM from the specified level
         """
         sub_command = args[0]
         if sub_command == "add" or sub_command == "remove":
@@ -139,6 +147,26 @@ class Commands(object):
                         output.append("Startup of init level {0} complete".format(level))
 
 
+    def help(self, *args):
+        """
+        Display the overall help menu or provide specific info on a command
+        """
+        if len(args) > 0:
+            cmd = args[0]
+            try:
+                cmd_func = getattr(self, cmd)
+                return map(strip, cmd_func.__doc__.split("\n"))
+            except:
+                return "That command doesn't exist"
+        else:
+            help_text = [
+                    "VirtualBox Overlord:",
+                    "Use help [cmd] for more specific information",
+                    ]
+            func_names = map(lambda x: '\t' + x[0],filter(lambda e: not e[0].startswith("__"),
+                    inspect.getmembers(self)))
+            help_text.extend(func_names)
+            return help_text
 
 
 

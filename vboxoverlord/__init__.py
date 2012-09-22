@@ -73,15 +73,19 @@ class Overlord(object):
         self.init_levels_changed = False
         # Used to tell if we modified the init levels
         self.commands = Commands(self)
-        temp = map(
-            lambda item: VboxServer(
-                item[1],
-                self.port,
-                self.username,
-                self.password
-                ),
-            self.config.items("servers")
-            )
+        try:
+            temp = map(
+                lambda item: VboxServer(
+                    item[1],
+                    self.port,
+                    self.username,
+                    self.password
+                    ),
+                self.config.items("servers")
+                )
+        except:
+            print("Failed to connect to hosts")
+            self.exit()
         self.servers = {}
         for server in temp:
             self.servers[server.host] = server
@@ -122,7 +126,11 @@ class Overlord(object):
         Write out the config file (assuming something has changed and exit()
         """
         #TODO check init levels and make sure we don't need to update the config
-
+        if self.init_levels_changed:
+            self.config.add_section("init_levels")
+            for level in self.init_levels:
+                self.config.set("init_levels", level, self.init_levels[level])
+        self.config.write(open(os.path.expanduser("~/.config/vboxoverlord/vbo.conf"),'w'))
         exit()
 
     def handle_input(self, cmd):
