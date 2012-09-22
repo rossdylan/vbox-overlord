@@ -1,7 +1,13 @@
 from __future__ import print_function
 from itertools import chain
-__all__ = ['get_all_vms',
-'get_all_vms_formatted', 'get_running_vms', 'get_all_running_vms', 'get_vm_host', 'print_list']
+__all__ = [
+    'get_all_vms',
+    'get_all_vms_formatted',
+    'get_all_running_vms_formatted',
+    'get_all_running_vms',
+    'get_all_vms',
+    'get_vm_host',
+    'print_list']
 
 def get_all_vms_formatted(vbo):
     """
@@ -14,6 +20,7 @@ def get_all_vms_formatted(vbo):
                 vbo.servers.values()
                 )
             )
+
 def get_all_vms(vbo):
     return chain.from_iterable(
             [vbox.get_all_vms() for vbox in vbo.servers.values()])
@@ -21,7 +28,8 @@ def get_all_vms(vbo):
 def get_all_running_vms(vbo):
     return chain.from_iterable(
             [vbox.get_running_vms() for vbox in vbo.servers.values()])
-def get_running_vms_formatted(vbo):
+
+def get_all_running_vms_formatted(vbo):
     """
     Get All running VMs on all servers
     """
