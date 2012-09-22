@@ -17,14 +17,14 @@ class Commands(object):
         """
         Command Function to print out a formatted list of all VMs on all servers
         """
-        return get_all_vms(self.vbo)
+        return get_all_vms_formatted(self.vbo)
 
     def runningvms(self, *args):
         """
         Command function to print out a formattted list of all running VMs on
         all servers
         """
-        return get_running_vms(self.vbo)
+        return get_all_running_vms_formatted(self.vbo)
 
     def stoppedvms(self, *args):
         """
