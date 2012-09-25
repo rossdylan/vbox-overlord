@@ -4,6 +4,7 @@ from commands import Commands
 import ConfigParser
 import os
 import os.path
+import readline
 
 def write_default_config():
     """
@@ -139,6 +140,7 @@ class Overlord(object):
 
 
 def rpel():
+    readline.parse_and_bind("tab: complete")
     overlord = Overlord()
     while True:
         try:
