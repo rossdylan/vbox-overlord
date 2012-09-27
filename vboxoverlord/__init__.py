@@ -7,19 +7,6 @@ import ConfigParser
 import os
 import os.path
 
-def build_init_levels(config):
-    """
-    Take the init levels as defined by the config file and turn them into a dict
-    that we can make sense of and use
-    """
-    init_dict = {}
-    for x in xrange(1,6):
-        init_str = config.get("init_levels", str(x))
-        if init_str == "":
-            init_dict[str(x)] = []
-        else:
-            init_dict[str(x)] = [v.strip() for v in init_str.split(",")]
-
 
 class Overlord(object):
     def __init__(self):
