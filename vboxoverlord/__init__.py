@@ -1,52 +1,11 @@
 from getpass import getpass
 from vbox import VboxServer
 from commands import Commands
+from util import write_default_config
+import readline
 import ConfigParser
 import os
 import os.path
-import readline
-
-def write_default_config():
-    """
-    Check to see if there is a preexisting config file and if there isn't make
-    a new one with the proper defaults
-    """
-    if os.path.exists(os.path.expanduser("~/.config/vboxoverlord/vbo.conf")):
-        return
-    else:
-        if not os.path.exists(os.path.expanduser("~/.config/vboxoverlord/")):
-            os.makedir(os.path.expanduser("~/.config/vboxoverlord"))
-        config = {
-                "global": {
-                    "username": "vm",
-                    "port": 22,
-                    },
-                "servers": {
-                    "local": "localhost",
-                    },
-                "init_levels": {
-                    "1": "",
-                    "2": "",
-                    "3": "",
-                    "4": "",
-                    "5": "",
-                    },
-                }
-        write_config(config)
-
-
-def write_config(config_dict):
-    """
-    Write a dict with config options out to the config file
-    """
-    with open(os.path.expanduser("~/.config/vboxoverlord/vbo.conf"),'wb') as f:
-        config = ConfigParser.RawConfigParser()
-        for section in config_dict:
-            config.add_section(section)
-            for key in config_dict[section]:
-                config.set(section, key, config_dict[section][key])
-        config.write(f)
-
 
 def build_init_levels(config):
     """
