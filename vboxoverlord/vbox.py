@@ -17,7 +17,7 @@ class VboxServer(object):
     def control_vm(self, VM, option):
         return self.connection.vboxmanage("controlvm", VM, option)
 
-    def start_headless(self, VM):
+    def start_vm(self, VM):
         return self.connection.vboxmanage("startvm", VM, type="headless")
 
     def force_stop(self, VM):
