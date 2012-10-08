@@ -90,9 +90,9 @@ class Commands(object):
         host = get_vm_host(self.vbo, vm_name)
         if host:
             host.start_vm(vm_name)
-            return "Started VM {0}"
+            return "Started VM {0}".format(vm_name)
         else:
-            return "VM {0} not found"
+            return "VM {0} not found".format(vm_name)
 
     def init(self, *args):
         """
