@@ -1,7 +1,7 @@
 from getpass import getpass
 from vbox import VboxServer
 from commands import Commands
-from util import write_default_config
+from util import write_default_config, build_init_levels
 import readline
 import ConfigParser
 import os
