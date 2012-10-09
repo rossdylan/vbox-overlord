@@ -29,7 +29,7 @@ def get_all_vms_formatted(vbo):
 
 def get_all_vms(vbo):
     return chain.from_iterable(
-            [vbox.get_all_vms() for vbox in vbo.servers.values()])
+            [vbox.get_vms() for vbox in vbo.servers.values()])
 
 
 def get_all_running_vms(vbo):

@@ -104,8 +104,13 @@ class Commands(object):
         """
         sub_command = args[0]
         if sub_command == "add" or sub_command == "remove":
+            if len(args) < 2:
+                return "Invalid number of arguments"
             level = args[1]
-            vm_name = " ".join(args[2:])
+            try:
+                vm_name = " ".join(args[2:])
+            except:
+                vm_name = ""
             if sub_command == "add":
                 result = self.vbo.add_init(level, vm_name)
                 if result:
