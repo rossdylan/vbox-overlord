@@ -6,7 +6,7 @@ import inspect
 
 class Commands(object):
     def __init__(self, vbo):
-        self.vbo = vbo
+        self._vbo = vbo
 
     def __call__(self, cmd, *args):
         try:
@@ -23,20 +23,20 @@ class Commands(object):
         """
         vms [] Print out all VMs on every server
         """
-        return get_all_vms_formatted(self.vbo)
+        return get_all_vms_formatted(self._vbo)
 
     def runningvms(self, *args):
         """
         runningvms [] Print out all running VMs on every server
         """
-        return get_all_running_vms_formatted(self.vbo)
+        return get_all_running_vms_formatted(self._vbo)
 
     def stoppedvms(self, *args):
         """
         stoppedvms [] Print out all stopped VMs on every server
         """
-        running = get_all_running_vms(self.vbo)
-        allvms = get_all_vms(self.vbo)
+        running = get_all_running_vms(self._vbo)
+        allvms = get_all_vms(self._vbo)
         return filter(lambda vm: vm not in running, allvms)
 
     def whereis(self, *args):
@@ -48,7 +48,7 @@ class Commands(object):
         else:
             vm_name = ' '.join(list(args))
             hosts = filter(lambda vbox: vm_name in vbox.get_vm_names(),
-                self.vbo.servers.values())
+                self._vbo.servers.values())
             try:
                 return ["'{0} is on '{1}'".format(vm_name, hosts[0].host)]
             except IndexError:
@@ -58,7 +58,7 @@ class Commands(object):
         """
         servers [] Print out a list of VBox servers we can control
         """
-        return [s for s in self.vbo.servers]
+        return [s for s in self._vbo.servers]
 
 
     def forcestop(self, *args):
@@ -66,7 +66,7 @@ class Commands(object):
         forcestop [VM_NAME] Pull the plug on a VM, essentially forcing it offline
         """
         vm_name = ' '.join(args)
-        host = get_vm_host(self.vbo, vm_name)
+        host = get_vm_host(self._vbo, vm_name)
         if host:
             return host.force_stop(vm_name)
 
@@ -75,10 +75,10 @@ class Commands(object):
         stop [VM_NAME] Ask the VM to shutdown nicely as opposed to forcefully powering it off
         """
         vm_name = ' '.join(args)
-        host = get_vm_host(self.vbo, vm_name)
+        host = get_vm_host(self._vbo, vm_name)
         if host:
             return host.stop(vm_name)
-        host = get_vm_host(self.vbo, vm_name)
+        host = get_vm_host(self._vbo, vm_name)
         if host:
             return host.co
 
@@ -87,7 +87,7 @@ class Commands(object):
         start [VM_NAME] Turn the specified VM on (This does so in headless mode)
         """
         vm_name = ' '.join(args)
-        host = get_vm_host(self.vbo, vm_name)
+        host = get_vm_host(self._vbo, vm_name)
         if host:
             host.start_vm(vm_name)
             return "Started VM {0}".format(vm_name)
@@ -112,7 +112,7 @@ class Commands(object):
             except:
                 vm_name = ""
             if sub_command == "add":
-                result = self.vbo.add_init(level, vm_name)
+                result = self._vbo.add_init(level, vm_name)
                 if result:
                     return "Added '{0}' to init level {1}".format(
                             vm_name,
@@ -122,7 +122,7 @@ class Commands(object):
                             vm_name,
                             level)
             if sub_command == "remove":
-                result = self.vbo.remove_init(level, vm_name)
+                result = self._vbo.remove_init(level, vm_name)
                 if result:
                     return "Removed '{0}' from init level {1}".format(
                             vm_name,
@@ -134,19 +134,19 @@ class Commands(object):
                 if sub_command == "start" or sub_command == "stop":
                     level = args[1]
                     if sub_command == "stop":
-                        vms_to_stop = self.vbo.init_levels[level]
+                        vms_to_stop = self._vbo.init_levels[level]
                         output = []
                         for vm in vms_to_stop:
-                            host = get_vm_host(self.vbo, vm)
+                            host = get_vm_host(self._vbo, vm)
                             result = host.force_stop(vm)
                             output.append(result)
                         output.append("Immediate shutdown of init level {0} complete".format(level))
                         return output
                     if sub_command == "start":
-                        vms_to_start = self.vbo.init_levels[level]
+                        vms_to_start = self._vbo.init_levels[level]
                         output = []
                         for vm in vms_to_start:
-                            host = get_vm_host(self.vbo, vm)
+                            host = get_vm_host(self._vbo, vm)
                             result = host.start(vm)
                             output.append(result)
                         output.append("Startup of init level {0} complete".format(level))
@@ -168,7 +168,7 @@ class Commands(object):
                     "VirtualBox Overlord:",
                     "Use help [cmd] for more specific information",
                     ]
-            func_names = map(lambda x: '\t' + x[0],filter(lambda e: not e[0].startswith("__"),
+            func_names = map(lambda x: '\t' + x[0],filter(lambda e: not e[0].startswith("_"),
                     inspect.getmembers(self)))
             help_text.extend(func_names)
             return help_text
@@ -180,6 +180,6 @@ class Commands(object):
         """
         Exit command, forwards directly to the Overlord.exit() function
         """
-        self.vbo.exit()
+        self._vbo.exit()
 
 
